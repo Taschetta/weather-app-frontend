@@ -3,81 +3,40 @@
     <h2>What's the weather like in...</h2>
     <SearchForm
       v-model:search="search"
-      @submit="onSearchSubmit"
+      @submit="filterLocations"
     />
-    <h3>Wich {{ search }}?</h3>
+    <h3>Wich {{ search || 'place' }}?</h3>
     <LocationList 
-      :items="results"
-      @click="onLocationClick"
+      :items="locations"
+      @click="$locations.show"
     />
   </main>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
+
 import SearchForm from '../components/SearchForm.vue';
 import LocationList from '../components/LocationList.vue';
 
+import useLocations from '../composables/useLocations.js'
+
 const $route = useRoute()
-const $router = useRouter()
+const $locations = useLocations()
 
 const search = ref($route.query.place || '')
-const results = ref([])
+const locations = ref([])
 
-async function searchLocations() {
-  results.value = [
-    {
-      "name": "Ituzaingó",
-      "lat": -34.6583293,
-      "lon": -58.6671441,
-      "country": "AR",
-      "state": "Buenos Aires"
-    },
-    {
-      "name": "Ituzaingó",
-      "lat": -34.8477309,
-      "lon": -56.1436365,
-      "country": "UY",
-      "state": "Montevideo"
-    },
-    {
-      "name": "Municipio de Ituzaingó",
-      "local_names": {
-          "es": "Municipio de Ituzaingó"
-      },
-      "lat": -27.5896182,
-      "lon": -56.6893413,
-      "country": "AR",
-      "state": "Corrientes"
-    },
-    {
-      "name": "Ituzaingó",
-      "lat": -31.4648072,
-      "lon": -64.0957127,
-      "country": "AR",
-      "state": "Córdoba"
-    },
-    {
-      "name": "Ituzaingó",
-      "lat": -34.420459,
-      "lon": -56.4236658,
-      "country": "UY",
-      "state": "San José"
-    }
-  ]
-}
-
-function onSearchSubmit() {
-  
-}
-
-function onLocationClick({ lat, lon }) {
-  $router.push({ path: '/place', query: { lat, lon } })
+async function filterLocations() {
+  locations.value = await $locations.filter(search.value)
+  if(locations.value.length === 1) {
+    $locations.show(locations.value[0])
+  }
 }
 
 onMounted(async () => {
-  await searchLocations()
+  await filterLocations()
 })
   
 </script>

@@ -5,67 +5,33 @@
       v-model:search="search"
       @submit="onSearchSubmit"
     />
-    <h3>Your Favourites</h3>
-    <LocationList
-      :items="favourites"
-      @click="onLocationClick"
-    />
+    <section class="stack" v-if="favourites.length">
+      <h3>Your Favourites</h3>
+      <LocationList
+        :items="favourites"
+        @click="onLocationClick"
+      />
+    </section>
   </main>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+
 import SearchForm from '../components/SearchForm.vue'
 import LocationList from '../components/LocationList.vue';  
 
+import useFavourites from '../composables/useFavourites.js';
+
 const $router = useRouter()
+const $favourites = useFavourites()
 
 const search = ref("")
 const favourites = ref([])
 
 async function loadFavourites() {
-  favourites.value = [
-    {
-      "name": "Ituzaingó",
-      "lat": -34.6583293,
-      "lon": -58.6671441,
-      "country": "AR",
-      "state": "Buenos Aires",
-      "temp": 289.88,
-      "feels_like": 289.15,
-      "temp_min": 289.23,
-      "temp_max": 293.09,
-      "pressure": 1021,
-      "humidity": 59,
-    },
-    {
-      "name": "Ituzaingó",
-      "lat": -34.6583293,
-      "lon": -58.6671441,
-      "country": "AR",
-      "state": "Buenos Aires",
-      "temp": 289.88,
-      "feels_like": 289.15,
-      "temp_min": 289.23,
-      "temp_max": 293.09,
-      "pressure": 1021,
-      "humidity": 59,
-    },
-    {
-      "name": "Ituzaingó",
-      "lat": -34.6583293,
-      "lon": -58.6671441,
-      "country": "AR",
-      "state": "Buenos Aires",
-      "temp": 289.88,
-      "feels_like": 289.15,
-      "temp_min": 289.23,
-      "temp_max": 293.09,
-      "pressure": 1021,
-      "humidity": 59,
-    },
-  ]
+  favourites.value = await $favourites.load()
 }
 
 function onSearchSubmit() {
